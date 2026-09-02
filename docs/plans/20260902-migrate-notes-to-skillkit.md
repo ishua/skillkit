@@ -91,8 +91,10 @@ build needs has its own `package.json` as workspace member.
   (rename Unreleased → dated, insert fresh Unreleased), `git add`, `git commit`,
   `git tag -a`. `--dry-run` supported.
 - **install-manifest.txt** format: `<source>::<dest>` per line, source relative
-  to skill root, dest relative to harness config dir. Blank lines and `#`-prefixed
-  comments ignored.
+  to the manifest file's own directory (i.e. `platforms/<harness>/`), dest
+  relative to harness config dir. This means shared files at skill root are
+  referenced as `../../SKILL.md`, local files as `dist/index.js`. Blank lines
+  and `#`-prefixed comments ignored.
 - **registry.example.json**: placeholder shape, no real paths, must be renamed
   to `registry.json` at install time (left untracked in installed location).
 - **dist committed**: `.gitignore` exception `!skills/*/platforms/*/dist/` allows
@@ -117,8 +119,9 @@ build needs has its own `package.json` as workspace member.
 | `scripts/version.sh` | generalized into `scripts/release.sh` |
 | `docs/` | `skills/notes/references/` |
 | `gr.md` | **excluded** (Russian; violates English-only rule — migrate content as a separate task) |
+| `Makefile` | **excluded** (replaced by `scripts/release.sh` and declarative install) |
 | `.opencode/` | not transferred (gitignored) |
-| `AGENTS.md` | merged into skillkit root AGENTS.md where applicable |
+| `AGENTS.md` | **not migrated** — entirely in Russian, notes-skill-specific conventions superseded by skillkit's own AGENTS.md. Relevant conventions (per-file < 150 lines, barrel imports) are already covered or will be added to skillkit AGENTS.md in Task 5. |
 
 ## Implementation Steps
 
@@ -147,6 +150,7 @@ build needs has its own `package.json` as workspace member.
 - [ ] Create root `package.json` with `"type": "module"`, bun workspaces config
   pointing to `skills/*/platforms/*/` (or a simpler glob that matches them)
 - [ ] Run `bun install` at root to verify workspace resolution works
+- [ ] Commit `bun.lock` at root (standard for reproducible installs)
 - [ ] Create `scripts/release.sh`:
   - Usage: `scripts/release.sh <skill> [patch|minor|major] [--dry-run]`
   - Read `skills/<skill>/VERSION` (single line, strip whitespace)
@@ -159,8 +163,12 @@ build needs has its own `package.json` as workspace member.
   - In production mode: `git add skills/<skill>/VERSION skills/<skill>/CHANGELOG.md`
   - `git commit -m "chore(<skill>): release vX.Y.Z"`
   - `git tag -a <skill>/vX.Y.Z -m "Release <skill>/vX.Y.Z"`
-  - Error if not on default branch (detect via `git rev-parse --abbrev-ref HEAD`)
+  - Error if not on default branch — reject if branch is neither `main` nor
+    `master` (matching original `version.sh` behavior)
 - [ ] `chmod +x scripts/release.sh`
+- [ ] Write `test/scripts/release.test.ts` covering: patch/minor/major bumps,
+  invalid SemVer, missing VERSION file, invalid bump type, `--dry-run` no-modify,
+  changelog restructure correctness, help/usage output.
 - [ ] Verify `scripts/release.sh notes --dry-run` works and produces expected
   output (old version → new version, no files modified)
 
@@ -182,6 +190,11 @@ build needs has its own `package.json` as workspace member.
 - [ ] Create `skills/notes/` directory structure
 - [ ] Copy and adapt `SKILL.md` to `skills/notes/SKILL.md`:
   - Strip all absolute paths (e.g. `/Users/amamyrin/...`) from example registry
+  - **Russian trigger phrases** («добавь в заметки», «запиши в заметки», etc.)
+    are FUNCTIONAL content needed for the skill to work with Russian-speaking
+    users. Keep them. Document an explicit exception in SKILL.md: trigger
+    phrases are multilingual by design; the English-only rule applies to
+    documentation prose, not to user-facing trigger patterns.
   - Change `skill/about.txt` → `VERSION` reference
   - Change `make install` section to reference `platforms/opencode/README.md`
   - Change `~/.config/opencode/skill/notes/registry.json` → `registry.json` at
@@ -194,12 +207,25 @@ build needs has its own `package.json` as workspace member.
 - [ ] Copy `dist/index.js` to `skills/notes/platforms/opencode/dist/index.js` (already bundled)
 - [ ] Copy `test/` to `skills/notes/platforms/opencode/test/`
   - Update any hardcoded paths (`NOTES_REGISTRY_PATH` env overrides should handle this)
+  - **Delete `test/scripts/install.test.ts`** — tests `scripts/install.sh` which
+    no longer exists. Replace with `test/scripts/install-manifest.test.ts` that
+    validates the manifest format (parses entries, checks source files exist).
+  - **Rewrite `test/scripts/version.test.ts` → `test/scripts/release.test.ts`**:
+    test the new `scripts/release.sh` API (`scripts/release.sh <skill> [bump]
+    [--dry-run]`), reading `VERSION` (not `about.txt`), namespaced tags, and
+    dry-run behavior. Move to root-level `test/` directory since `release.sh`
+    lives at repo root.
 - [ ] Copy `package.json` to `skills/notes/platforms/opencode/package.json`
   - Rename `"name"` to `"name": "skillkit-notes-opencode"` (workspace-scoped)
   - Remove root-level version — per-skill version lives in `VERSION`
+  - Keep `"version"` field in sync with `VERSION` file (set to `"0.1.0"`) to
+    avoid bun workspace confusion
   - Update `build` script: `bun build src/index.ts --outdir dist --target bun`
 - [ ] Copy `tsconfig.json` to `skills/notes/platforms/opencode/tsconfig.json`
-- [ ] Copy `docs/plans/` → `skills/notes/references/plans/` (if useful for reference)
+- [ ] Copy `docs/` → `skills/notes/references/` **excluding** `docs/plans/`
+  (implementation history in Russian with absolute paths — violates skillkit
+  English-only and no-personal-data rules). Do NOT copy
+  `docs/plans/completed/notes-skill-implementation.md`.
 - [ ] Create `skills/notes/references/` from `gr.md` content:
   - **Exclude `gr.md` as-is** — it is in Russian and violates English-only rule.
   - Create `skills/notes/references/architecture.md` with an English summary of
@@ -216,7 +242,8 @@ build needs has its own `package.json` as workspace member.
       }
     }
     ```
-  - Add top-level comment: `/* Replace root values with actual paths. This file is a template; the installed registry.json is untracked. */`
+  - Do NOT add inline JSON comments (invalid JSON). Document the template
+    purpose in `platforms/opencode/README.md` instead.
 - [ ] Create `skills/notes/platforms/opencode/install-manifest.txt`:
   ```
   # Install manifest for notes skill (opencode platform)
