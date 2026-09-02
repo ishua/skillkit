@@ -119,11 +119,17 @@ files into place. There is no heavy install script that runs at startup.
 
 ### `install-manifest.txt` format
 
-- One entry per line: `<source>::<dest>`.
+- One entry per line: `<source>::<dest>[::<mode>]`.
 - `<source>` is relative to the manifest file's own directory, i.e.
   `platforms/<harness>/`. Shared files at the skill root are referenced with
   `../../`; local files are referenced directly (e.g. `dist/index.js`).
 - `<dest>` is relative to the harness config dir base (see below).
+- `<mode>` is optional: `overwrite` (default) or `if-missing`.
+  - `overwrite` — always copy source over dest.
+  - `if-missing` — copy/rename source to dest only if dest does not already
+    exist; if it exists, leave it untouched. Use this for user-edited files
+    (e.g. a registry template renamed into place on first install) so a
+    re-install never clobbers configured data.
 - Blank lines and `#`-prefixed comment lines are ignored.
 
 Example:
@@ -133,7 +139,7 @@ Example:
 ../../SKILL.md::skill/notes/SKILL.md
 dist/index.js::plugins/notes.js
 ../../VERSION::skill/notes/VERSION
-registry.example.json::skill/notes/registry.example.json
+registry.example.json::skill/notes/registry.json::if-missing
 ```
 
 ### Harness config dir base

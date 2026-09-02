@@ -18,12 +18,11 @@ The destination base is `~/.config/opencode/`. Override it with the
    `plugins/notes.js` (the plugin bundle) and `../../SKILL.md` maps to
    `skill/notes/SKILL.md`.
 
-2. **Create the registry (first install only).** The manifest places the
-   template at `skill/notes/registry.example.json` — it does not overwrite a
-   runtime `registry.json`, so a re-install never clobbers your configured
-   projects. On the first install, copy the template to `registry.json` (it is
-   a template only, used by the skill at runtime) and replace the placeholder
-   values with your real projects:
+2. **Point the registry at your projects.** The manifest renames the template
+   `registry.example.json` to `skill/notes/registry.json` on the first install
+   (its `if-missing` entry), and never touches an existing `registry.json` on a
+   re-install — so your configured projects are never overwritten. Replace the
+   placeholder values in `registry.json` with your real projects:
 
    ```json
    {

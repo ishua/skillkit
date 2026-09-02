@@ -5,9 +5,12 @@ import { dirname, join, resolve, sep } from "node:path"
 const PLATFORM_DIR = resolve(import.meta.dir, "..", "..")
 const MANIFEST_PATH = join(PLATFORM_DIR, "install-manifest.txt")
 
+type CopyMode = "overwrite" | "if-missing"
+
 interface ManifestEntry {
   source: string
   dest: string
+  mode: CopyMode
 }
 
 function parseManifest(): ManifestEntry[] {
@@ -16,9 +19,16 @@ function parseManifest(): ManifestEntry[] {
     .split("\n")
     .filter((l) => l.trim().length > 0 && !l.trim().startsWith("#"))
     .map((l) => {
-      const idx = l.indexOf("::")
-      if (idx === -1) throw new Error(`invalid manifest line (missing '::'): ${l}`)
-      return { source: l.slice(0, idx).trim(), dest: l.slice(idx + 2).trim() }
+      const parts = l.split("::")
+      if (parts.length < 2) throw new Error(`invalid manifest line (missing '::'): ${l}`)
+      if (parts.length > 3) throw new Error(`invalid manifest line (too many '::'): ${l}`)
+      const source = parts[0].trim()
+      const dest = parts[1].trim()
+      const mode = (parts[2] ? parts[2].trim() : "overwrite") as CopyMode
+      if (mode !== "overwrite" && mode !== "if-missing") {
+        throw new Error(`invalid manifest line (unknown mode '${mode}'): ${l}`)
+      }
+      return { source, dest, mode }
     })
 }
 
@@ -60,7 +70,14 @@ describe("install manifest (notes/opencode)", () => {
     expect(dests).toContain("skill/notes/SKILL.md")
     expect(dests).toContain("plugins/notes.js")
     expect(dests).toContain("skill/notes/VERSION")
-    expect(dests).toContain("skill/notes/registry.example.json")
+    expect(dests).toContain("skill/notes/registry.json")
+  })
+
+  test("registry template is copied to registry.json with if-missing mode", () => {
+    const entry = parseManifest().find((e) => e.dest === "skill/notes/registry.json")
+    expect(entry).toBeDefined()
+    expect(entry!.source).toBe("registry.example.json")
+    expect(entry!.mode).toBe("if-missing")
   })
 
   test("source paths stay inside the skill (no escaping the repo)", () => {
