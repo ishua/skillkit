@@ -1,0 +1,27 @@
+# deps
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+
+# build
+dist/
+*.tsbuildinfo
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# локальное состояние агентов
+.claude/settings.local.json
+CLAUDE.local.md
+.opencode/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+
+# logs
+*.log
