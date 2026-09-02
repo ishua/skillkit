@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Fixed
+### Removed
+
+---
+
+## [0.1.1] — 2026-09-02
+
+### Added
 
 - Plugin entry point (`src/index.ts`) wiring `capture_finding`, `add_project`,
   `remove_project`, `list_projects` tools
