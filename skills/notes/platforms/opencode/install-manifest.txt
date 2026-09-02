@@ -1,0 +1,13 @@
+# Install manifest for notes skill (opencode platform)
+# Format: <source>::<dest>
+#   - source: path relative to this file's directory (platforms/opencode/)
+#   - dest: path relative to $OPENCODE_CONFIG_DIR
+#
+# Blank lines and lines starting with # are ignored.
+#
+# The registry template lands as registry.example.json, never over an existing
+# runtime registry.json, so a re-install cannot clobber configured projects.
+../../SKILL.md::skill/notes/SKILL.md
+dist/index.js::plugins/notes.js
+../../VERSION::skill/notes/VERSION
+registry.example.json::skill/notes/registry.example.json

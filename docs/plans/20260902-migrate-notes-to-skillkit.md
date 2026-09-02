@@ -15,11 +15,11 @@ for skillkit and migrates notes as the first real skill under it.
   untracked + `config.example.json` with placeholders, English only, standard
   skill format, harness differences in install scripts not in SKILL.md, public
   repo (no absolute paths / personal data).
-- notes-skill (`/Users/amamyrin/Documents/repo/skills/notes-skill`): TypeScript
+- notes-skill (the prior standalone source repo): TypeScript
   plugin source in `src/`, bundled `dist/index.js`, manifest-driven
   `scripts/install.sh`, SemVer `scripts/version.sh`, `CHANGELOG.md`,
-  `skill/about.txt` (version 0.1.0), `registry.json` (seed with absolute path
-  `/Users/amamyrin/...` — must become `registry.example.json`).
+  `skill/about.txt` (version 0.1.0), `registry.json` (seed with an absolute
+  personal machine path — must become `registry.example.json`).
 - skillkit `.gitignore` ignores `dist/` globally — needs exception for
   `!skills/*/platforms/*/dist/`.
 - notes-skill `SKILL.md` and `gr.md` contain absolute paths; `gr.md` is in
@@ -129,7 +129,7 @@ build needs has its own `package.json` as workspace member.
 **Files:**
 - Create: `docs/design/versioning-and-install.md`
 
-- [ ] Write `docs/design/versioning-and-install.md` covering:
+- [x] Write `docs/design/versioning-and-install.md` covering:
   - Shared-root + platforms/ layout rationale
   - Per-skill versioning: `VERSION`, `CHANGELOG.md`, namespaced git tags
   - `scripts/release.sh` behavior and `--dry-run` support
@@ -137,7 +137,7 @@ build needs has its own `package.json` as workspace member.
   - Dist policy: committed bundles, `.gitignore` exception
   - Workspace setup: root `package.json` + per-platform workspace members
   - What goes at skill root vs. under `platforms/<harness>/`
-- [ ] verify document is complete and internally consistent
+- [x] verify document is complete and internally consistent
 
 ### Task 2: Root infrastructure
 **Files:**
@@ -145,13 +145,13 @@ build needs has its own `package.json` as workspace member.
 - Create: `package.json`
 - Create: `scripts/release.sh`
 
-- [ ] Update `.gitignore`: add `!skills/*/platforms/*/dist/` exception so committed
+- [x] Update `.gitignore`: add `!skills/*/platforms/*/dist/` exception so committed
   bundles under platforms/ are not ignored
-- [ ] Create root `package.json` with `"type": "module"`, bun workspaces config
+- [x] Create root `package.json` with `"type": "module"`, bun workspaces config
   pointing to `skills/*/platforms/*/` (or a simpler glob that matches them)
-- [ ] Run `bun install` at root to verify workspace resolution works
-- [ ] Commit `bun.lock` at root (standard for reproducible installs)
-- [ ] Create `scripts/release.sh`:
+- [x] Run `bun install` at root to verify workspace resolution works
+- [x] Commit `bun.lock` at root (standard for reproducible installs)
+- [x] Create `scripts/release.sh`: 
   - Usage: `scripts/release.sh <skill> [patch|minor|major] [--dry-run]`
   - Read `skills/<skill>/VERSION` (single line, strip whitespace)
   - Validate SemVer format (`X.Y.Z`)
@@ -165,11 +165,11 @@ build needs has its own `package.json` as workspace member.
   - `git tag -a <skill>/vX.Y.Z -m "Release <skill>/vX.Y.Z"`
   - Error if not on default branch — reject if branch is neither `main` nor
     `master` (matching original `version.sh` behavior)
-- [ ] `chmod +x scripts/release.sh`
-- [ ] Write `test/scripts/release.test.ts` covering: patch/minor/major bumps,
+- [x] `chmod +x scripts/release.sh`
+- [x] Write `test/scripts/release.test.ts` covering: patch/minor/major bumps,
   invalid SemVer, missing VERSION file, invalid bump type, `--dry-run` no-modify,
   changelog restructure correctness, help/usage output.
-- [ ] Verify `scripts/release.sh notes --dry-run` works and produces expected
+- [x] Verify `scripts/release.sh notes --dry-run` works and produces expected
   output (old version → new version, no files modified)
 
 ### Task 3: Migrate notes skill
@@ -187,9 +187,10 @@ build needs has its own `package.json` as workspace member.
 - Create: `skills/notes/references/`
 - Modify: `AGENTS.md`, `README.md`
 
-- [ ] Create `skills/notes/` directory structure
-- [ ] Copy and adapt `SKILL.md` to `skills/notes/SKILL.md`:
-  - Strip all absolute paths (e.g. `/Users/amamyrin/...`) from example registry
+- [x] Create `skills/notes/` directory structure
+- [x] Copy and adapt `SKILL.md` to `skills/notes/SKILL.md`:
+  - Strip all absolute personal paths (e.g. any real machine path) from
+    example registry
   - **Russian trigger phrases** («добавь в заметки», «запиши в заметки», etc.)
     are FUNCTIONAL content needed for the skill to work with Russian-speaking
     users. Keep them. Document an explicit exception in SKILL.md: trigger
@@ -199,13 +200,13 @@ build needs has its own `package.json` as workspace member.
   - Change `make install` section to reference `platforms/opencode/README.md`
   - Change `~/.config/opencode/skill/notes/registry.json` → `registry.json` at
     install location (document both source and dest in install-manifest)
-- [ ] Copy `skill/about.txt` content into `skills/notes/VERSION` (single line: `0.1.0`)
-- [ ] Copy `CHANGELOG.md` unchanged to `skills/notes/CHANGELOG.md`
-- [ ] Copy `src/` to `skills/notes/platforms/opencode/src/`
+- [x] Copy `skill/about.txt` content into `skills/notes/VERSION` (single line: `0.1.0`)
+- [x] Copy `CHANGELOG.md` unchanged to `skills/notes/CHANGELOG.md`
+- [x] Copy `src/` to `skills/notes/platforms/opencode/src/`
   - Update `INSTALLED_REGISTRY_PATH` / `NOTES_REGISTRY_PATH` if hardcoded paths exist
   - Verify no absolute paths remain in source
-- [ ] Copy `dist/index.js` to `skills/notes/platforms/opencode/dist/index.js` (already bundled)
-- [ ] Copy `test/` to `skills/notes/platforms/opencode/test/`
+- [x] Copy `dist/index.js` to `skills/notes/platforms/opencode/dist/index.js` (already bundled)
+- [x] Copy `test/` to `skills/notes/platforms/opencode/test/`
   - Update any hardcoded paths (`NOTES_REGISTRY_PATH` env overrides should handle this)
   - **Delete `test/scripts/install.test.ts`** — tests `scripts/install.sh` which
     no longer exists. Replace with `test/scripts/install-manifest.test.ts` that
@@ -215,23 +216,23 @@ build needs has its own `package.json` as workspace member.
     [--dry-run]`), reading `VERSION` (not `about.txt`), namespaced tags, and
     dry-run behavior. Move to root-level `test/` directory since `release.sh`
     lives at repo root.
-- [ ] Copy `package.json` to `skills/notes/platforms/opencode/package.json`
+- [x] Copy `package.json` to `skills/notes/platforms/opencode/package.json`
   - Rename `"name"` to `"name": "skillkit-notes-opencode"` (workspace-scoped)
   - Remove root-level version — per-skill version lives in `VERSION`
   - Keep `"version"` field in sync with `VERSION` file (set to `"0.1.0"`) to
     avoid bun workspace confusion
   - Update `build` script: `bun build src/index.ts --outdir dist --target bun`
-- [ ] Copy `tsconfig.json` to `skills/notes/platforms/opencode/tsconfig.json`
-- [ ] Copy `docs/` → `skills/notes/references/` **excluding** `docs/plans/`
+- [x] Copy `tsconfig.json` to `skills/notes/platforms/opencode/tsconfig.json`
+- [x] Copy `docs/` → `skills/notes/references/` **excluding** `docs/plans/`
   (implementation history in Russian with absolute paths — violates skillkit
   English-only and no-personal-data rules). Do NOT copy
   `docs/plans/completed/notes-skill-implementation.md`.
-- [ ] Create `skills/notes/references/` from `gr.md` content:
+- [x] Create `skills/notes/references/` from `gr.md` content:
   - **Exclude `gr.md` as-is** — it is in Russian and violates English-only rule.
   - Create `skills/notes/references/architecture.md` with an English summary of
     the dispatcher architecture (translate the substance, not the Russian text).
     Keep a note: "Original design notes in Russian were excluded per repo policy."
-- [ ] Create `skills/notes/platforms/opencode/registry.example.json`:
+- [x] Create `skills/notes/platforms/opencode/registry.example.json`:
   - Use same JSON shape as original `registry.json`
   - Replace absolute paths with placeholder examples:
     ```json
@@ -244,7 +245,7 @@ build needs has its own `package.json` as workspace member.
     ```
   - Do NOT add inline JSON comments (invalid JSON). Document the template
     purpose in `platforms/opencode/README.md` instead.
-- [ ] Create `skills/notes/platforms/opencode/install-manifest.txt`:
+- [x] Create `skills/notes/platforms/opencode/install-manifest.txt`:
   ```
   # Install manifest for notes skill (opencode platform)
   # Format: <source>::<dest> (relative to skill root :: relative to $OPENCODE_CONFIG_DIR)
@@ -253,53 +254,53 @@ build needs has its own `package.json` as workspace member.
   VERSION::skill/notes/VERSION
   platforms/opencode/registry.example.json::skill/notes/registry.json
   ```
-- [ ] Create `skills/notes/platforms/opencode/README.md`:
+- [x] Create `skills/notes/platforms/opencode/README.md`:
   - Short install instructions: read manifest, copy files, rename registry.example.json
   - Dest base: `~/.config/opencode/` (overridable via `OPENCODE_CONFIG_DIR`)
   - Steps: 1. Copy files per manifest 2. Rename `registry.example.json` to
     `registry.json` and fill in actual project paths
   - No absolute paths, no machine-specific instructions
-- [ ] Run `bun install` at root — verify workspace detects
+- [x] Run `bun install` at root — verify workspace detects
   `skills/notes/platforms/opencode/package.json`
-- [ ] Run `bun build` under `skills/notes/platforms/opencode/` — verify output
+- [x] Run `bun build` under `skills/notes/platforms/opencode/` — verify output
   `dist/index.js` is identical to the migrated one
-- [ ] Run `bun test` under `skills/notes/platforms/opencode/` — all tests pass
+- [x] Run `bun test` under `skills/notes/platforms/opencode/` — all tests pass
 
 ### Task 4: Verify acceptance criteria
 **Files:** (none)
 
-- [ ] `scripts/release.sh notes --dry-run` prints: old=0.1.0, new=0.1.1, no files modified
-- [ ] `.gitignore` exception `!skills/*/platforms/*/dist/` is present and correct
-- [ ] Root `package.json` has workspaces; `bun install` resolves notes-opencode dep
-- [ ] `skills/notes/VERSION` exists and contains `0.1.0` (single line, no whitespace)
-- [ ] `skills/notes/SKILL.md` has no absolute paths, describes install via README
-- [ ] `skills/notes/platforms/opencode/registry.example.json` has placeholder paths
+- [x] `scripts/release.sh notes --dry-run` prints: old=0.1.0, new=0.1.1, no files modified
+- [x] `.gitignore` exception `!skills/*/platforms/*/dist/` is present and correct
+- [x] Root `package.json` has workspaces; `bun install` resolves notes-opencode dep
+- [x] `skills/notes/VERSION` exists and contains `0.1.0` (single line, no whitespace)
+- [x] `skills/notes/SKILL.md` has no absolute paths, describes install via README
+- [x] `skills/notes/platforms/opencode/registry.example.json` has placeholder paths
   and a comment indicating it is a template
-- [ ] `skills/notes/platforms/opencode/install-manifest.txt` has all required entries
-- [ ] `skills/notes/platforms/opencode/dist/index.js` exists (committed bundle)
-- [ ] `skills/notes/references/` exists with English architecture doc; `gr.md` not copied as-is
-- [ ] `skills/focus/` is unaffected (no changes to existing skill)
-- [ ] Run full test suite (`bun test` at root or skill level) — all tests pass
+- [x] `skills/notes/platforms/opencode/install-manifest.txt` has all required entries
+- [x] `skills/notes/platforms/opencode/dist/index.js` exists (committed bundle)
+- [x] `skills/notes/references/` exists with English architecture doc; `gr.md` not copied as-is
+- [x] `skills/focus/` is unaffected (no changes to existing skill)
+- [x] Run full test suite (`bun test` at root or skill level) — all tests pass
 
 ### Task 5: Update documentation
 **Files:**
 - Modify: `AGENTS.md`, `README.md`
 
-- [ ] Update `AGENTS.md` Skill format section to reflect shared-root + platforms/
+- [x] Update `AGENTS.md` Skill format section to reflect shared-root + platforms/
   model: add `VERSION`, `CHANGELOG.md`, `platforms/<harness>/` to the directory
   tree example; document dist policy and registry.example.json convention.
   Update name rules, frontmatter guidance, and reference file paths to match.
-- [ ] Update `AGENTS.md` Installation section to reference the declarative
+- [x] Update `AGENTS.md` Installation section to reference the declarative
   manifest + README approach; clarify that differences between harnesses live
   in `platforms/<harness>/`, not in the shared root or in SKILL.md.
-- [ ] Add a section to `AGENTS.md` on versioning: `VERSION` + `CHANGELOG.md` +
+- [x] Add a section to `AGENTS.md` on versioning: `VERSION` + `CHANGELOG.md` +
   namespaced tags + `scripts/release.sh`.
-- [ ] Update root `README.md`:
+- [x] Update root `README.md`:
   - Replace the current placeholder outline with the real structure
   - List available skills (`notes`, `focus`) with harness support summary
   - Point to `skills/<name>/platforms/<harness>/README.md` for per-skill install
   - Add a note about the versioning model and workspace setup
-- [ ] Commit all changes: `git add -A && git commit -m "docs: add versioning/install model and migrate notes skill"`
+- [x] Commit all changes: `git add -A && git commit -m "docs: add versioning/install model and migrate notes skill"`
 
 ## Post-Completion
 

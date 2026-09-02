@@ -41,14 +41,29 @@ Models handle English more reliably, and the repo is public.
 
 Conversations with the maintainer may be in any language. Files may not.
 
+User-facing trigger phrases (for example the multilingual note-capture patterns
+in the `notes` skill) are a deliberate exception: they are functional, not
+documentation prose. Where a skill needs such patterns, the exception is
+documented inside that skill's `SKILL.md`.
+
 ## Installation
 
-Never install skills with symlinks. Installation always goes through the
-scripts in `scripts/`, which copy files to the target location.
+Installation is declarative and manifest-driven. Each platform directory
+carries an `install-manifest.txt` (a list of `<source>::<dest>` pairs) and a
+`README.md` with instructions. An agent (or the maintainer) reads the manifest
+and copies files into the harness config directory — there is no heavy install
+script that runs at startup. The manifest format and the per-harness
+destination bases are described in `docs/design/versioning-and-install.md`.
 
-A symlink makes an installed skill mutate on every repo change, erasing the
-line between source and installed copy and silently altering behavior on other
-people's machines.
+Never install skills with symlinks. A symlink makes an installed skill mutate
+on every repo change, erasing the line between source and installed copy and
+silently altering behavior on other people's machines. Installation is always a
+plain file copy.
+
+Differences between harnesses — install locations, bundled runtimes, build
+config, per-harness configuration — live under `platforms/<harness>/`, never in
+the shared root and never in `SKILL.md`. The shared root and `SKILL.md` stay
+harness-agnostic so they are not duplicated per harness.
 
 The maintainer may point a harness at this repo through harness settings for
 local development. That is a development convenience, not an install path, and
@@ -56,13 +71,31 @@ must not be documented as one.
 
 ## Skill format
 
-Skills follow the Agent Skills standard (https://agentskills.io/specification).
+Skills follow the Agent Skills standard (https://agentskills.io/specification)
+and the shared-root + `platforms/` layout described in
+`docs/design/versioning-and-install.md`. A skill is a single logical unit that
+may ship for several harnesses. Shared content lives once at the skill root;
+only harness-specific code, bundles, and install metadata go under per-harness
+platform directories.
 
     skills/<skill-name>/
-    ├── SKILL.md          # required
-    ├── scripts/          # optional helper scripts
-    ├── references/       # optional docs, loaded on demand
-    └── assets/           # optional templates and fixtures
+    ├── SKILL.md               # required, shared (harness-agnostic)
+    ├── VERSION                # single line, e.g. "0.1.0"
+    ├── CHANGELOG.md           # per-skill changelog (Keep a Changelog)
+    ├── scripts/               # optional shared helper scripts
+    ├── references/            # optional shared docs, loaded on demand
+    ├── assets/                # optional shared templates and fixtures
+    └── platforms/
+        ├── opencode/          # harness-specific src, dist, manifest, README
+        ├── claude-code/       # (future)
+        └── pi/                # (future)
+
+A file goes under `platforms/<harness>/` if and only if it is specific to one
+harness: its source, its compiled output, its build configuration, its install
+manifest, and its install instructions. Everything a harness consumes
+identically (SKILL.md, VERSION, CHANGELOG.md, scripts, references, assets)
+lives once at the skill root. A harness gets a directory only once it has a
+real implementation; porting a skill across harnesses is additive.
 
 Frontmatter uses standard fields only: `name`, `description`, `license`,
 `compatibility`, `metadata`, `allowed-tools`, `disable-model-invocation`.
@@ -80,7 +113,51 @@ use it. If a skill should run only on explicit request, set
 `disable-model-invocation: true` instead of asking the model in prose to hold
 back.
 
-Reference files inside a skill by relative path from the skill directory.
+Reference files inside a skill by relative path from the skill directory, and
+from a platform directory by a `../../` path into the shared root.
+
+### Committed bundles
+
+Users install a skill on another machine and generally do not build from
+source. Compiled bundles are therefore committed under
+`platforms/<harness>/dist/`. The root `.gitignore` ignores `dist/` globally,
+so a negation exception (`!skills/*/platforms/*/dist/`) keeps these bundles
+tracked. Because the bundle is committed, an installed skill runs without a
+local toolchain and install is a plain file copy.
+
+### User-specific configuration
+
+User-specific settings (for example the `notes` project registry) are never
+committed. Ship a template as `<name>.example.json` (such as
+`registry.example.json`) with placeholder values; at install time the user
+copies it to the real config file (e.g. `registry.json`) and fills in their
+values. The runtime config stays untracked. This is the same rule as the
+`config.example.json` / untracked `config.json` convention above.
+
+## Versioning
+
+Each skill is versioned independently; versions never live at the repository
+root because skills evolve on different cadences and are installed
+independently. A skill carries:
+
+- `VERSION` — a single line `X.Y.Z` (SemVer 2.0.0), the canonical source of
+  truth for that skill's version. Any per-platform `package.json` keeps its
+  `version` field in sync with this file.
+- `CHANGELOG.md` — a per-skill changelog in Keep a Changelog 1.1.0 format. A
+  `## [Unreleased]` section is always present; on release it becomes a dated
+  heading and a fresh empty one is inserted above it.
+- Namespaced git tags — `<skill-name>/vX.Y.Z` (e.g. `notes/v0.1.0`,
+  `focus/v1.2.0`), so a single repo holds many skills without tag collisions.
+
+Releases are driven by the root script:
+
+    scripts/release.sh <skill> [patch|minor|major] [--dry-run]
+
+It reads `skills/<skill>/VERSION`, validates and bumps it, rewrites
+`CHANGELOG.md`, writes the new version back, and — in production mode — commits
+and creates the namespaced annotated tag. `--dry-run` previews the result without
+modifying files or git. Tagging is always done by `release.sh`, never by hand.
+See `docs/design/versioning-and-install.md` for the full contract.
 
 ## Harness support
 
@@ -92,4 +169,5 @@ which harness it targets, and what breaks elsewhere. An untested harness is not
 a supported one — never claim support that has not been verified.
 
 Differences between harnesses are usually install locations, not skill content.
-Keep those differences in the install scripts, not in SKILL.md.
+Keep those differences in `platforms/<harness>/`, not in the shared root or in
+SKILL.md.

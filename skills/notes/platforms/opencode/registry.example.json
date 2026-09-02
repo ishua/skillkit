@@ -1,0 +1,6 @@
+{
+  "example-project": {
+    "root": "/path/to/project",
+    "default": true
+  }
+}

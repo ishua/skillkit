@@ -1,0 +1,11 @@
+{
+  "name": "skillkit",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "skills/*/platforms/*/"
+  ],
+  "scripts": {
+    "test": "bun test"
+  }
+}
