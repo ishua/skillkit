@@ -1,0 +1,5 @@
+# Install manifest for the revdiff skill (omp platform)
+# Destination base: ~/.omp/agent/
+../../SKILL.md::skills/revdiff/SKILL.md
+../../VERSION::skills/revdiff/VERSION
+../../scripts/open-review.sh::skills/revdiff/scripts/open-review.sh

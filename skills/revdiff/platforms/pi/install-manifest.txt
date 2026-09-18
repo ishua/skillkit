@@ -1,0 +1,5 @@
+# Install manifest for the revdiff skill (pi platform)
+# Destination base: ~/.pi/agent/ (override with PI_CONFIG_DIR if supported)
+../../SKILL.md::skills/revdiff/SKILL.md
+../../VERSION::skills/revdiff/VERSION
+../../scripts/open-review.sh::skills/revdiff/scripts/open-review.sh

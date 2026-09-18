@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/open-review.sh`: environment checks (agterm, agtermctl, revdiff),
   absolute-path launch, `--target`/`--cwd`/`--pane`/`--follow` handling, and
   annotation-file plumbing (`-o`) with exit-code propagation
+- Install manifests and instructions for pi, omp, and opencode under
+  `platforms/`
 ### Changed
 ### Fixed
 ### Removed

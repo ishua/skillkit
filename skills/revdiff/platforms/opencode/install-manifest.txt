@@ -1,0 +1,5 @@
+# Install manifest for the revdiff skill (opencode platform)
+# Destination base: ~/.config/opencode/ (override with OPENCODE_CONFIG_DIR)
+../../SKILL.md::skill/revdiff/SKILL.md
+../../VERSION::skill/revdiff/VERSION
+../../scripts/open-review.sh::skill/revdiff/scripts/open-review.sh
