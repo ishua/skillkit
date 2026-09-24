@@ -48,6 +48,13 @@ If arguments follow the command, treat them as a filter or as context
 for this run (for example: only work sources, only one file). Apply
 them to what gets shown. They never modify the config.
 
+Exception — plan dictation: if the arguments are a prioritized plan for
+today (typically numbered, referencing item numbers of a previous
+focus.md extraction), this is not a filter. Write the items into the
+daily-buffer source's `## план` exactly as its config `description`
+specifies, commit locally, and show the resulting план. Never promote
+plan items into tasks of other sources.
+
 ## Output
 
 Group by source, in config order. Keep each task's original wording;

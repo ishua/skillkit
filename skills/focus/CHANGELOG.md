@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 ### Fixed
+
+- `SKILL.md`: document the plan-dictation exception — a prioritized plan
+  passed as arguments is recorded into the daily-buffer source's
+  `## план` section instead of being treated as a filter
+
 ### Removed
 
 ---
